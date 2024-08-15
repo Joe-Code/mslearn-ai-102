@@ -1,2 +1,2 @@
 This repository implements the code samples from the course sylabus for the AI-102 Microsoft Certification:
-Designing and Implementing a Microsoft Azure AI Solution
+[Designing and Implementing a Microsoft Azure AI Solution](https://learn.microsoft.com/en-us/training/courses/ai-102t00)
