@@ -10,3 +10,7 @@ $env:AZUREOPENAI_REGION = "your_endpoint_key"
 Set environmnet variables for Azure Language Service:
 $env:LANGUAGESERVICE_ENDPOINT = "your_endpoint_value"
 $env:LANGUAGESERVICE_KEY = "your_endpoint_key"
+
+Set environmnet variables for Azure Speech Service:
+$env:SPEECHSERVICE_REGION = "your_region_value"
+$env:SPEECHSERVICE_KEY = "your_endpoint_key"
