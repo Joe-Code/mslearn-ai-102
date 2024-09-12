@@ -1,7 +1,96 @@
+# Ignore build output directories
 bin/
 obj/
+
+# Ignore Visual Studio files
 .vs/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Ignore Rider files
+.idea/
+*.sln.iml
+
+# Ignore Bootstrap files
+bootstrap/
+node_modules/bootstrap/
+
+# Ignore ASP.NET temporary files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Ignore NuGet packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Ignore npm packages
+node_modules/
+
+# Ignore jQuery files
+jquery/
+node_modules/jquery/
+wwwroot/lib
+
+# Ignore jQuery Validate files
+jquery-validation/
+jquery-validation-unobtrusive/
+node_modules/jquery-validation/
+wwwroot/lib/jquery-validation/
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore compiled DLLs and PDBs
+*.dll
+*.pdb
+
+# Ignore publish output
+publish/
+
+# Ignore coverage results
+coverage/
+*.coverage
+*.coveragexml
+
+# Ignore Resharper files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Ignore JetBrains Rider files
+.idea/
+*.sln.iml
+
+# Ignore Azure Functions local settings file
+local.settings.json
+
+# Ignore MacOS files
+.DS_Store
+
+# Ignore Windows thumbnail cache files
+Thumbs.db
+
+# Ignore Python virtual environments
+venv/
+.env/
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore any other IDE specific files
+*.swp
+*.bak
+*.orig
+*.rej
