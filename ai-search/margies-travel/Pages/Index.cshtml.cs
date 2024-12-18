@@ -1,19 +1,133 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.WebUtilities;
+using MargiesTravel.Models;
+using Microsoft.Extensions.Configuration;
 
-namespace margies_travel.Pages;
+// Import search namespaces
+using Azure;
+using Azure.Search.Documents;
+using Azure.Search.Documents.Models;
 
-public class IndexModel : PageModel
+namespace MargiesTravel.Pages
 {
-    private readonly ILogger<IndexModel> _logger;
-
-    public IndexModel(ILogger<IndexModel> logger)
+    public class IndexModel : PageModel
     {
-        _logger = logger;
-    }
+        private readonly ILogger<IndexModel> _logger;
 
-    public void OnGet()
-    {
+        public IndexModel(ILogger<IndexModel> logger)
+        {
+            _logger = logger;
+        }
 
+        private Uri? SearchEndpoint;
+        private string? QueryKey;
+        private string? IndexName;
+        public string SearchTerms { get; set; } = "";
+        public string SortOrder { get; set; } = "search.score()";
+
+        public string FilterExpression { get; set; } = "";
+
+        public required SearchResults<SearchResult> search_results;
+
+        //Wrapper function for request to search index
+        public SearchResults<SearchResult> search_query(string searchText, string filterBy, string sortOrder)
+        {
+            if (SearchEndpoint == null || QueryKey == null || IndexName == null)
+            {
+                throw new Exception("SearchEndpoint, QueryKey, and IndexName must be set");
+            }
+
+            // Create a search client
+            AzureKeyCredential credential = new AzureKeyCredential(QueryKey);
+            SearchClient searchClient = new SearchClient(SearchEndpoint, IndexName, credential);
+
+            // Submit search query
+            /// <summary>
+            /// Configures the search options for querying the travel data.
+            /// /// /// </summary>
+            /// <remarks>
+            /// This configuration includes the following settings:
+            /// - <c>IncludeTotalCount</c>: Indicates whether to include the total count of results.
+            /// - <c>SearchMode</c>: Specifies the search mode to be used (e.g., All).
+            /// - <c>Filter</c>: Applies a filter to the search results based on the specified criteria.
+            /// - <c>OrderBy</c>: Defines the order in which the results should be sorted.
+            /// - <c>Facets</c>: Specifies the facets to be included in the search results, such as "metadata_author".
+            /// - <c>HighlightFields</c>: Lists the fields that should have highlighted content in the results, such as "merged_content-3" and "imageCaption-3".
+            /// </remarks>
+            /// /// /// /// /// 
+            var options = new SearchOptions
+            {
+                IncludeTotalCount = true,
+                SearchMode = SearchMode.All,
+                Filter = filterBy,
+                OrderBy = { sortOrder },
+                Facets = { "metadata_author" },
+                HighlightFields = { "merged_content-3", "imageCaption-3" }
+            };
+
+            options.Select.Add("url");
+            options.Select.Add("metadata_storage_name");
+            options.Select.Add("metadata_author");
+            options.Select.Add("metadata_storage_size");
+            options.Select.Add("metadata_storage_last_modified");
+            options.Select.Add("language");
+            options.Select.Add("sentiment");
+            options.Select.Add("merged_content");
+            options.Select.Add("keyphrases");
+            options.Select.Add("locations");
+            options.Select.Add("imageTags");
+            options.Select.Add("imageCaption");
+            SearchResults<SearchResult> results = searchClient.Search<SearchResult>(searchText, options);
+
+            return results;
+        }
+
+        public void OnGet()
+        {
+            // Get the search endpoint and key
+            IConfigurationBuilder _builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
+            IConfigurationRoot _configuration = _builder.Build();
+            
+            if (_configuration["SearchServiceEndpoint"] == null || _configuration["SearchServiceQueryApiKey"] == null || _configuration["SearchIndexName"] == null)
+            {
+                throw new Exception("SearchEndpoint, QueryKey, and IndexName must be set");
+            }
+
+            SearchEndpoint = new Uri(_configuration["SearchServiceEndpoint"]);
+            QueryKey = _configuration["SearchServiceQueryApiKey"];
+            IndexName = _configuration["SearchIndexName"];
+
+            if (Request.QueryString.HasValue)
+            {
+                var queryString = QueryHelpers.ParseQuery(Request.QueryString.ToString());
+                SearchTerms = queryString["search"];
+
+                if (queryString.Keys.Contains("sort"))
+                {
+                    SortOrder = queryString["sort"];
+                }
+
+                if (queryString.Keys.Contains("facet"))
+                {
+                    FilterExpression = "metadata_author eq '" + queryString["facet"] + "'";
+                }
+                else
+                {
+                    FilterExpression = "";
+                }
+
+                search_results = search_query(SearchTerms, FilterExpression, SortOrder);
+            }
+            else
+            {
+                SearchTerms = "";
+            }
+        }
     }
 }
